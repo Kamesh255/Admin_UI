@@ -1,4 +1,9 @@
-# Getting Started with Create React App
+# Admin UI Problem Statement
+<ul>
+    <li> 
+        Column titles must stand out from the entries.
+    </li>
+</ul>
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
