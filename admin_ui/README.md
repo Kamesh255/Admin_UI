@@ -28,25 +28,17 @@
     <li>CSS (Bootstrap)</li>
     <li>JavaScript</li>
     <li>React JS</li>
-</ul>
-
-<hr/>
+</ul>  
 
 ## Screenshots
-<img src="Screenshot.png" alt="Screenshot" />
-
-<hr/>
+<img src="Screenshot.png" alt="Screenshot" /> 
 
 ## Installing dependencies  
 ### `npm start`
-
-<hr/>
-
+ 
 ## Running tests (watch mode)
 ### `npm test`
-
-<hr/>
-
+ 
 ## Running service (watch mode) 
 ### `npm run dev`
  
