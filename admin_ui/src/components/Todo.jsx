@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import _ from "lodash";
 
 const Todo = () => {
-    const [table, setTable] = useState([])
+    const [table, setTable] = useState([]) 
     const [search,setSearch] = useState("")
     const [paginationPosts,setpaginationPosts] = useState([])
     const [currentpage,setCurrentpage] = useState(1)
@@ -53,12 +53,17 @@ const Todo = () => {
                 <td>{el.email}</td>
                 <td>{el.role}</td>
                 <td><button className='btn btn-success'>Edit</button></td>
-                <td><button className='btn btn-danger'>Remove</button></td>
+                <td><button className='btn btn-danger' onClick={()=>handleDelete(el.name)}>Remove</button></td>
             </tr>
         )
     })
+
+    const handleDelete=(name)=>{
+        paginationPosts.filter(el=>el.name != name)
+        setpaginationPosts([...paginationPosts])
+    }
     console.log(paginationPosts)
-    console.log(table)
+    // console.log(table)
   return (
      <>
      <div className='container'>
