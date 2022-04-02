@@ -94,8 +94,7 @@ const Todo = () => {
                  }  
              </ul>
          </nav>
-     </div>
-
+     </div>  
      </>
   )
 } 
