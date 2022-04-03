@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react'
-import _ from "lodash";
+import Pagination from "./Pagination";
 
 const Todo = () => {
     const [table, setTable] = useState([]) 
     const [search,setSearch] = useState("")
-    const [paginationPosts,setpaginationPosts] = useState([])
-    const [currentpage,setCurrentpage] = useState(1)
-    const pageSize = 10;
+    const [loading, setLoading]= useState(false)
+    const [ currentPage, setCurrentPage] = useState(1)
+    const [postsPerPage, setPostsPerPage] = useState(10) 
+    const [updateName,setUpdateName] = useState("")
+    const [updateEmail,setUpdateEmail] = useState("")
+    const [updateRole, setUpdateRole] = useState("")
+    const [updateId, setUpdateId] = useState("")
+    const [showEdit,setShowEdit] = useState(false)
+   
     const showData = async () =>{
         try{
+            setLoading(true)
             const req = await fetch("https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json")
             const res = await req.json()
-            setTable(res) 
-            setpaginationPosts(_(res).slice(0).take(pageSize).value());
+            setTable(res)  
         }catch (e){
             console.log(e)
         } 
@@ -21,24 +27,17 @@ const Todo = () => {
         showData()
     },[])
 
-    const pageCount = table ? Math.ceil(table.length/pageSize) : 0;
-    if(pageCount === 1) return null;
-    const pages = _.range(1,pageCount+1)
+    const indexOfLastPost = currentPage * postsPerPage;
+    const indecOfFirstPost = indexOfLastPost - postsPerPage;
+    const currentPosts =  table.slice(indecOfFirstPost, indexOfLastPost)
+    console.log(currentPosts)
 
-    
-    const paginationNo = (pageNo)=>{
-        setCurrentpage(pageNo)
-        const startIndex = (pageNo - 1) * pageSize;
-        const paginatedPost = _(table).slice(startIndex).take(pageSize).value()
-        setpaginationPosts(paginatedPost)
-    }
+    const paginate=(pageNumber)=>setCurrentPage(pageNumber)   
 
-    let td_data =  paginationPosts.filter(el=> {
+    let td_data =  currentPosts.filter(el=> {
         if(search === ""){
             return el
         }else if(el.name.toLowerCase().includes(search.toLowerCase())){
-            return el
-        }else if(el.id.toLowerCase().includes(search.toLowerCase())){
             return el
         }else if(el.email.toLowerCase().includes(search.toLowerCase())){
             return el
@@ -48,34 +47,76 @@ const Todo = () => {
     }).map((el)=>{
         return(
             <tr key={el.id}> 
-                <td>{el.id}</td>
+                <td>
+                <input
+                className="form-check-input "
+                type="checkbox"
+                aria-label="Checkbox for following text input"
+               />
+                </td>
                 <td>{el.name}</td>
                 <td>{el.email}</td>
                 <td>{el.role}</td>
-                <td><button className='btn btn-success'>Edit</button></td>
+                <td><button className='btn btn-success' onClick={()=>handleEdit(el)}>Edit</button></td>
                 <td><button className='btn btn-danger' onClick={()=>handleDelete(el.name)}>Remove</button></td>
             </tr>
         )
     })
 
     const handleDelete=(name)=>{
-        paginationPosts.filter(el=>el.name != name)
-        setpaginationPosts([...paginationPosts])
+        let newData =  table.filter(el=>el.name != name)
+       setTable([...newData])
     }
-    console.log(paginationPosts)
-    // console.log(table)
+    const handleEdit =(e)=>{
+        setShowEdit(true)
+        setUpdateId(e.id)
+         setUpdateName(e.name)
+         setUpdateEmail(e.email)
+         setUpdateRole(e.role)
+    }
+
+    const updateValue =()=>{ 
+        table.find((el)=>{
+            if(el.id == updateId){
+                el.name= updateName
+                el.email =updateEmail
+                el.role = updateRole
+            }
+        })
+        setTable([...table]) 
+        setUpdateId('')
+        setUpdateName('')
+        setUpdateEmail('')
+        setUpdateRole('')
+        setShowEdit(false)
+        alert("Data Updated Successfully")
+    }
+    
+    
   return (
      <>
      <div className='container'>
          <h1>Admin UI</h1>
          <hr style={{height:"5px",color:"black"}} />
          <br />
-         <input className='form-control' type="text" placeholder='Search by name id email role' onChange={(e)=>{setSearch(e.target.value)}} />
-         <br />
+         <input className='form-control' type="text" placeholder='Search by name id email role...' onChange={(e)=>{setSearch(e.target.value)}} />
+         {showEdit && <div className='form-control'>
+        <h3 class="fw-lighter">Edit Admin UI</h3>
+            <div style={{display:"flex",justifyContent:"space-between"}}> 
+             <input style={{border:"none"}} type="text" placeholder='update name' value={updateName} onChange={e=>{setUpdateName(e.target.value)}} />
+             <input style={{border:"none"}} type="text" placeholder='update email' value={updateEmail} onChange={e=>{setUpdateEmail(e.target.value)}} />
+             <select style={{border:"none"}} name="role" id="role" form="rolform" value={updateRole} onChange={e=>{setUpdateRole(e.target.value)}}>
+                    <option value="member">member</option>
+                    <option value="admin">admin</option> 
+            </select>
+             <button className='btn btn-success' onClick={updateValue}>OK</button>
+             <button className='btn btn-danger' onClick={()=>setShowEdit(false)} >Cancel</button>
+            </div>
+         </div>}
          <table className='table'>
              <thead>
                  <tr>
-                     <th>ID</th>
+                     <th>Check</th>
                      <th>NAME</th>
                      <th>EMAIL</th>
                      <th>ROLE</th>
@@ -87,18 +128,7 @@ const Todo = () => {
                  {td_data}
              </tbody>
          </table>
-         <nav className='d-flex justify-content-center'>
-             <ul className='pagination'>
-                 {
-                     pages.map((page)=>(
-                        <li className={
-                            page === currentpage ? "page-item active":"page-item" }>
-                            <p className='page-link' onClick={()=>paginationNo(page)}>{page}</p>
-                        </li>
-                     ))
-                 }  
-             </ul>
-         </nav>
+         <Pagination postsPerPage={postsPerPage} totalPosts={table.length} paginate={paginate} /> 
      </div>  
      </>
   )
